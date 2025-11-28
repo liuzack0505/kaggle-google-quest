@@ -8,15 +8,18 @@ from common import N_TARGETS
 
 class TextDataset(Dataset):
 
-    def __init__(self, x_features, question_ids, answer_ids, seg_question_ids, 
+    def __init__(self, x_features, question_ids, answer_ids, seg_question_ids,
                  seg_answer_ids, idxs, targets=None):
-        self.question_ids = question_ids[idxs].astype(np.long)
-        self.answer_ids = answer_ids[idxs].astype(np.long)
-        self.seg_question_ids = seg_question_ids[idxs].astype(np.long)
-        self.seg_answer_ids = seg_answer_ids[idxs].astype(np.long)
+        self.question_ids = question_ids[idxs].astype(np.int64)
+        self.answer_ids = answer_ids[idxs].astype(np.int64)
+        self.seg_question_ids = seg_question_ids[idxs].astype(np.int64)
+        self.seg_answer_ids = seg_answer_ids[idxs].astype(np.int64)
         self.x_features = x_features[idxs].astype(np.float32)
-        if targets is not None: self.targets = targets[idxs].astype(np.float32)
-        else: self.targets = np.zeros((self.x_features.shape[0], N_TARGETS), dtype=np.float32)
+        if targets is not None:
+            self.targets = targets[idxs].astype(np.float32)
+        else:
+            self.targets = np.zeros(
+                (self.x_features.shape[0], N_TARGETS), dtype=np.float32)
 
     def __getitem__(self, idx):
         q_ids = self.question_ids[idx]
@@ -33,13 +36,16 @@ class TextDataset(Dataset):
 
 class TransformerOutputDataset(Dataset):
 
-    def __init__(self, x_features, question_outputs, answer_outputs, idxs, 
+    def __init__(self, x_features, question_outputs, answer_outputs, idxs,
                  targets=None):
         self.question_outputs = question_outputs[idxs].astype(np.float32)
         self.answer_outputs = answer_outputs[idxs].astype(np.float32)
         self.x_features = x_features[idxs].astype(np.float32)
-        if targets is not None: self.targets = targets[idxs].astype(np.float32)
-        else: self.targets = np.zeros((self.x_features.shape[0], N_TARGETS), dtype=np.float32)
+        if targets is not None:
+            self.targets = targets[idxs].astype(np.float32)
+        else:
+            self.targets = np.zeros(
+                (self.x_features.shape[0], N_TARGETS), dtype=np.float32)
 
     def __getitem__(self, idx):
         q_outputs = self.question_outputs[idx]

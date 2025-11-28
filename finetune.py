@@ -11,7 +11,7 @@ from sklearn.preprocessing import MinMaxScaler
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from transformers import AdamW
+from torch.optim import AdamW
 
 from common import TARGETS, N_TARGETS
 from utils.helpers import init_logger, init_seed
@@ -52,7 +52,7 @@ def get_model_outputs(model, loader, checkpoint_file, device, model_type='siames
 
             q_outputs.append(to_cpu(batch_q_outputs))
             a_outputs.append(to_cpu(batch_a_outputs))
-        
+
         q_outputs = torch.cat(q_outputs)
         a_outputs = torch.cat(a_outputs)
 
@@ -71,7 +71,7 @@ def build_parser():
     return parser
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 
     parser = build_parser()
     args = parser.parse_args()
@@ -84,9 +84,8 @@ if __name__=='__main__':
     os.makedirs(log_dir, exist_ok=True)
     main_logger = init_logger(log_dir, f'finetune_main_{model_name}.log')
 
-
     # Import data
-    test  = pd.read_csv(f'{args.data_dir}test.csv')
+    test = pd.read_csv(f'{args.data_dir}test.csv')
     train = pd.read_csv(f'{args.data_dir}train.csv')
 
     # Min Max scale target after rank transformation
@@ -96,20 +95,21 @@ if __name__=='__main__':
     y = train[TARGETS].values
 
     # Get model inputs
-    ids_train, seg_ids_train = tokenize(train, pretrained_model_str=pretrained_models[model_name])
-    cat_features_train, _ = get_ohe_categorical_features(train, test, 'category')
-
+    ids_train, seg_ids_train = tokenize(
+        train, pretrained_model_str=pretrained_models[model_name])
+    cat_features_train, _ = get_ohe_categorical_features(
+        train, test, 'category')
 
     # Set training parameters
-    device       = 'cuda'
-    num_workers  = 10
-    n_folds      = 10
-    lr           = 1e-5
-    n_epochs     = 10
-    bs           = 2
-    grad_accum   = 4
+    device = 'cuda'
+    num_workers = 10
+    n_folds = 10
+    lr = 1e-5
+    n_epochs = 10
+    bs = 2
+    grad_accum = 4
     weight_decay = 0.01
-    loss_fn      = nn.BCEWithLogitsLoss()
+    loss_fn = nn.BCEWithLogitsLoss()
 
     # Start training
     init_seed()
@@ -120,58 +120,65 @@ if __name__=='__main__':
     main_logger.info(f'Start finetuning model {model_name}...')
 
     for fold_id, (train_index, valid_index) in enumerate(folds):
-        
+
         main_logger.info(f'Fold {fold_id + 1} started at {time.ctime()}')
-        
-        fold_logger = init_logger(log_dir, f'finetune_fold_{fold_id+1}_{model_name}.log')
-        
+
+        fold_logger = init_logger(
+            log_dir, f'finetune_fold_{fold_id+1}_{model_name}.log')
+
         loader = DataLoader(
             TextDataset(cat_features_train, ids_train['question'], ids_train['answer'],
-                        seg_ids_train['question'], seg_ids_train['answer'], np.arange(len(train)), y), 
+                        seg_ids_train['question'], seg_ids_train['answer'], np.arange(len(train)), y),
             batch_size=bs, shuffle=False, num_workers=num_workers
         )
-        
+
         model = models[model_name]()
         checkpoint_file = f'{checkpoint_dir}{model_name}_fold_{fold_id+1}_best.pth'
 
         # Get last hidden layer outputs from transformers
-        fold_logger.info(f'Precompute transformer outputs for model {model_name}...')
-        q_outputs, a_outputs = get_model_outputs(model, loader, checkpoint_file, device, model_type)
+        fold_logger.info(
+            f'Precompute transformer outputs for model {model_name}...')
+        q_outputs, a_outputs = get_model_outputs(
+            model, loader, checkpoint_file, device, model_type)
 
         train_loader = DataLoader(
-            TransformerOutputDataset(cat_features_train, q_outputs, a_outputs, train_index, y), 
+            TransformerOutputDataset(
+                cat_features_train, q_outputs, a_outputs, train_index, y),
             batch_size=bs, shuffle=True, num_workers=num_workers
         )
         valid_loader = DataLoader(
-            TransformerOutputDataset(cat_features_train, q_outputs, a_outputs, valid_index, y),
+            TransformerOutputDataset(
+                cat_features_train, q_outputs, a_outputs, valid_index, y),
             batch_size=bs, shuffle=False, num_workers=num_workers, drop_last=False
         )
 
         # Train the head of the model
-        optimizer = AdamW(get_optimizer_param_groups(model.head, lr, weight_decay))
+        optimizer = AdamW(get_optimizer_param_groups(
+            model.head, lr, weight_decay))
 
         learner = Learner(
-            model.head, 
-            optimizer, 
-            train_loader, 
-            valid_loader, 
-            loss_fn, 
-            device, 
-            n_epochs, 
-            f'{model_name}_head_fold_{fold_id + 1}', 
-            checkpoint_dir, 
-            scheduler=None, 
-            metric_spec={'spearmanr': spearmanr_torch}, 
+            model.head,
+            optimizer,
+            train_loader,
+            valid_loader,
+            loss_fn,
+            device,
+            n_epochs,
+            f'{model_name}_head_fold_{fold_id + 1}',
+            checkpoint_dir,
+            scheduler=None,
+            metric_spec={'spearmanr': spearmanr_torch},
             monitor_metric=True,
-            minimize_score=False, 
+            minimize_score=False,
             logger=fold_logger,
             grad_accum=grad_accum,
             batch_step_scheduler=False,
             eval_at_start=True
         )
         learner.train()
-        
-        oofs[valid_index] = infer(learner.model, valid_loader, learner.best_checkpoint_file, device)
+
+        oofs[valid_index] = infer(
+            learner.model, valid_loader, learner.best_checkpoint_file, device)
 
         # Save tuned model in half precision (reduces memory making it easier to upload to Kaggle)
         head_checkpoint_file = f'{checkpoint_dir}{model_name}_head_fold_{fold_id+1}_best.pth'
@@ -179,17 +186,18 @@ if __name__=='__main__':
         model.head.load_state_dict(checkpoint['model_state_dict'])
         model.half()
         tuned_checkpoint_file = f'{checkpoint_dir}{model_name}_tuned_fold_{fold_id+1}_best.pth'
-        torch.save({'model_state_dict': model.state_dict()}, tuned_checkpoint_file)
+        torch.save({'model_state_dict': model.state_dict()},
+                   tuned_checkpoint_file)
 
-        
     main_logger.info(f'Finished tuning {model_name}')
 
-
     # Print CV scores
-    ix = np.where(train.groupby("question_body")["host"].transform("count")==1)[0] # unique question index
+    ix = np.where(train.groupby("question_body")["host"].transform(
+        "count") == 1)[0]  # unique question index
     main_logger.info('CVs:')
     main_logger.info(get_cvs(oofs, y, ix))
 
     # Store OOFs
     os.makedirs('oofs/', exist_ok=True)
-    pd.DataFrame(oofs, columns=TARGETS).to_csv(f'oofs/{model_name}_tuned_oofs.csv')
+    pd.DataFrame(oofs, columns=TARGETS).to_csv(
+        f'oofs/{model_name}_tuned_oofs.csv')
