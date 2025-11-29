@@ -7,6 +7,7 @@ import pandas as pd
 from sklearn.model_selection import GroupKFold
 from sklearn.preprocessing import MinMaxScaler
 
+import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
@@ -110,11 +111,12 @@ if __name__ == '__main__':
     num_workers = 10
     n_folds = 10
     lr = 0.001
-    n_epochs = 10
+    n_epochs = 4
     bs = 2
     grad_accum = 4
     weight_decay = 0.01
-    loss_fn = nn.BCEWithLogitsLoss()
+    loss_fn = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([
+        0.9, 1, 1.5, 0.8, 0.8, 0.8, 0.96, 1.1, 1.1, 3,  1, 1.1, 2, 3, 3,   2, 1, 2, 1, 2, 0.9, 0.75, 0.9, 0.75, 0.75, 0.7, 1, 2.5, 1, 0.75]))
 
     # Start training
     init_seed()

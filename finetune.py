@@ -105,7 +105,7 @@ if __name__ == '__main__':
     num_workers = 10
     n_folds = 10
     lr = 1e-5
-    n_epochs = 10
+    n_epochs = 5
     bs = 2
     grad_accum = 4
     weight_decay = 0.01
