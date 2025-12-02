@@ -83,19 +83,23 @@ if __name__ == '__main__':
     model_name = args.model_name
     model_type = 'double' if model_name == 'double_albert' else 'siamese'
 
-    # Set checkpoint and log directories based on flags
-    checkpoint_dir = args.checkpoint_dir
-    log_dir = args.log_dir
+   # Define mapping from arguments to folder name suffixes
+    suffix_mapping = {
+        'enable_loss_fn_weights': 'weight',
+        'enable_awp': 'awp'
+    }
 
-    if args.enable_loss_fn_weights and args.enable_awp:
-        checkpoint_dir = args.checkpoint_dir + 'enable_loss_fn_weights_awp/'
-        log_dir = args.log_dir + 'enable_loss_fn_weights_awp/'
-    elif args.enable_loss_fn_weights:
-        checkpoint_dir = args.checkpoint_dir + 'enable_loss_fn_weights/'
-        log_dir = args.log_dir + 'enable_loss_fn_weights/'
-    elif args.enable_awp:
-        checkpoint_dir = args.checkpoint_dir + 'awp/'
-        log_dir = args.log_dir + 'awp/'
+    # Build folder name based on model and enabled features
+    folder_name_parts = [model_name]
+    for arg_name, suffix in suffix_mapping.items():
+        if getattr(args, arg_name, False):
+            folder_name_parts.append(suffix)
+    folder_name = '_'.join(folder_name_parts)
+
+    # Set checkpoint, log, and OOF directories
+    checkpoint_dir = os.path.join(args.checkpoint_dir, folder_name) + '/'
+    log_dir = os.path.join(args.log_dir, folder_name) + '/'
+    oof_dir = os.path.join('oofs/', folder_name) + '/'
 
     os.makedirs(checkpoint_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
@@ -236,13 +240,6 @@ if __name__ == '__main__':
     main_logger.info(get_cvs(oofs, y, ix))
 
     # Store OOFs
-    store_path = 'oofs/'
-    if args.enable_loss_fn_weights and args.enable_awp:
-        store_path = 'oofs/enable_loss_fn_weights_awp/'
-    elif args.enable_loss_fn_weights:
-        store_path = 'oofs/enable_loss_fn_weights/'
-    elif args.enable_awp:
-        store_path = 'oofs/awp/'
-    os.makedirs(store_path, exist_ok=True)
+    os.makedirs(oof_dir, exist_ok=True)
     pd.DataFrame(oofs, columns=TARGETS).to_csv(
-        f'{store_path}{model_name}_tuned_oofs.csv')
+        f'{oof_dir}{model_name}_tuned_oofs.csv')
