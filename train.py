@@ -1,3 +1,4 @@
+from ast import parse
 import os
 import time
 import argparse
@@ -22,6 +23,7 @@ from one_cycle import OneCycleLR
 from create_features import get_ohe_categorical_features
 from evaluation import spearmanr_torch, get_cvs
 from inference import infer
+from awp import AWP
 
 from models.siamese_transformers import SiameseBert, SiameseRoberta, SiameseXLNet
 from models.double_transformers import DoubleAlbert
@@ -74,6 +76,9 @@ def build_parser():
     parser.add_argument('-checkpoint_dir', type=str, default='checkpoints/')
     parser.add_argument('-log_dir', type=str, default='logs/')
     parser.add_argument('-data_dir', type=str, default='data/')
+    parser.add_argument('-enable_loss_fn_weights', action='store_true')
+    parser.add_argument('-enable_awp', action='store_true',
+                        help='Enable Adversarial Weight Perturbation')
     return parser
 
 
@@ -84,8 +89,21 @@ if __name__ == '__main__':
 
     model_name = args.model_name
     model_type = 'double' if model_name == 'double_albert' else 'siamese'
+
+    # Set checkpoint and log directories based on flags
     checkpoint_dir = args.checkpoint_dir
     log_dir = args.log_dir
+
+    if args.enable_loss_fn_weights and args.enable_awp:
+        checkpoint_dir = args.checkpoint_dir + 'enable_loss_fn_weights_awp/'
+        log_dir = args.log_dir + 'enable_loss_fn_weights_awp/'
+    elif args.enable_loss_fn_weights:
+        checkpoint_dir = args.checkpoint_dir + 'enable_loss_fn_weights/'
+        log_dir = args.log_dir + 'enable_loss_fn_weights/'
+    elif args.enable_awp:
+        checkpoint_dir = args.checkpoint_dir + 'awp/'
+        log_dir = args.log_dir + 'awp/'
+
     os.makedirs(checkpoint_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
     main_logger = init_logger(log_dir, f'train_main_{model_name}.log')
@@ -115,8 +133,14 @@ if __name__ == '__main__':
     bs = 2
     grad_accum = 4
     weight_decay = 0.01
-    loss_fn = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([
-        0.9, 1, 1.5, 0.8, 0.8, 0.8, 0.96, 1.1, 1.1, 3,  1, 1.1, 2, 3, 3,   2, 1, 2, 1, 2, 0.9, 0.75, 0.9, 0.75, 0.75, 0.7, 1, 2.5, 1, 0.75]))
+    if args.enable_loss_fn_weights:
+        loss_fn = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([
+            0.9, 1, 1.5, 0.8, 0.8, 0.8, 0.96, 1.1, 1.1, 3,  1, 1.1, 2, 3, 3,   2, 1, 2, 1, 2, 0.9, 0.75, 0.9, 0.75, 0.75, 0.7, 1, 2.5, 1, 0.75]).to(device))
+    else:
+        loss_fn = nn.BCEWithLogitsLoss()
+    awp_start_epoch = 1
+    awp_lr = 1
+    awp_eps = 0.001
 
     # Start training
     init_seed()
@@ -150,6 +174,19 @@ if __name__ == '__main__':
         scheduler = OneCycleLR(optimizer, n_epochs=n_epochs,
                                n_batches=len(train_loader))
 
+        # Initialize AWP if enabled
+        awp = None
+        if args.enable_awp:
+            awp = AWP(
+                model=model,
+                optimizer=optimizer,
+                adv_lr=awp_lr,
+                adv_eps=awp_eps,
+                start_epoch=awp_start_epoch,
+                adv_param='weight'
+            )
+            main_logger.info(
+                f'AWP enabled: lr={awp_lr}, eps={awp_eps}, start_epoch={awp_start_epoch}')
         learner = Learner(
             model,
             optimizer,
@@ -166,7 +203,8 @@ if __name__ == '__main__':
             minimize_score=False,
             logger=fold_logger,
             grad_accum=grad_accum,
-            batch_step_scheduler=True
+            batch_step_scheduler=True,
+            awp=awp
         )
         learner.train()
 
@@ -182,5 +220,13 @@ if __name__ == '__main__':
     main_logger.info(get_cvs(oofs, y, ix))
 
     # Store OOFs
-    os.makedirs('oofs/', exist_ok=True)
-    pd.DataFrame(oofs, columns=TARGETS).to_csv(f'oofs/{model_name}_oofs.csv')
+    store_path = 'oofs/'
+    if args.enable_loss_fn_weights and args.enable_awp:
+        store_path = 'oofs/enable_loss_fn_weights_awp/'
+    elif args.enable_loss_fn_weights:
+        store_path = 'oofs/enable_loss_fn_weights/'
+    elif args.enable_awp:
+        store_path = 'oofs/awp/'
+    os.makedirs(store_path, exist_ok=True)
+    pd.DataFrame(oofs, columns=TARGETS).to_csv(
+        f'{store_path}{model_name}_tuned_oofs.csv')
