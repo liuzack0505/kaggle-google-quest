@@ -6,8 +6,8 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from tqdm import tqdm
 
-from utils.helpers import update_avg
-from utils.torch import to_device, to_cpu
+from utilities.helpers import update_avg
+from utilities.torch import to_device, to_cpu
 
 
 class Learner():

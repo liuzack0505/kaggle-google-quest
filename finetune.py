@@ -14,9 +14,9 @@ from torch.utils.data import DataLoader
 from torch.optim import AdamW
 
 from common import TARGETS, N_TARGETS
-from utils.helpers import init_logger, init_seed
-from utils.torch import to_numpy, to_device, to_cpu
-from datasets import TextDataset, TransformerOutputDataset
+from utilities.helpers import init_logger, init_seed
+from utilities.torch import to_numpy, to_device, to_cpu
+from custom_datasets import TextDataset, TransformerOutputDataset
 from tokenization import tokenize
 from learning import Learner
 from one_cycle import OneCycleLR

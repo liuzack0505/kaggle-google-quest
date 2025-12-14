@@ -47,3 +47,11 @@ python train.py -model_name=double_albert -enable_loss_fn_weights -enable_awp &&
 ```
 
 The notebooks folder contains two notebooks. The `stacking.ipynb` implements our weighted ensembling + post-processing grid search and the `oof_cvs.ipynb` shows the CV scores of our models under variuos settings (i.e. ignoring hard targets or ignoring duplicate question rows).
+
+### Predict
+
+BERT
+
+```
+python predict.py -model_name=siamese_bert -checkpoint_dir checkpoints/siamese_bert/
+```

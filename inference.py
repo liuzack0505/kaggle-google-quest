@@ -5,7 +5,7 @@ from tqdm import tqdm
 import torch
 
 from common import N_TARGETS
-from utils.torch import to_device, to_numpy
+from utilities.torch import to_device, to_numpy
 
 
 def infer_batch(inputs, model, device):

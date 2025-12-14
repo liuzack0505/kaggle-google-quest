@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from torch.optim.lr_scheduler import LambdaLR
 
-from utils.torch import set_optimizer_mom
+from utilities.torch import set_optimizer_mom
 
 
 def cosine_annealing(it, n_iter, start_val, end_val):
