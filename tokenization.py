@@ -5,10 +5,12 @@ from transformers import BertTokenizer, RobertaTokenizer, AlbertTokenizer, XLNet
 
 
 tokenizers = {
-    'bert-base-uncased': BertTokenizer,
+    # 'bert-base-uncased': BertTokenizer,
     'roberta-base': RobertaTokenizer,
     'xlnet-base-cased': XLNetTokenizer,
-    'albert-base-v2': AlbertTokenizer
+    'albert-base-v2': AlbertTokenizer,
+
+    './bert-base-uncased': BertTokenizer,
 }
 
 

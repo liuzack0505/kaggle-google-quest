@@ -16,7 +16,7 @@ def avg_pool_forward(model, ModelClass, ids, seg_ids=None):
 
 
 class SiameseTransformer(nn.Module):
-    def __init__(self, AvgPooledModel, pretrained_model_name='bert-base-uncased'):
+    def __init__(self, AvgPooledModel, pretrained_model_name='./bert-base-uncased'):
         super().__init__()
         self.transformer = AvgPooledModel.from_pretrained(pretrained_model_name)
         self.head = Head(n_h=256, n_feats=5, n_bert=768, dropout=0.2)
@@ -34,7 +34,7 @@ class AvgPooledBert(BertModel):
     
 class SiameseBert(SiameseTransformer):
     def __init__(self):
-        super().__init__(AvgPooledBert, 'bert-base-uncased')
+        super().__init__(AvgPooledBert, './bert-base-uncased')
 
 
 class AvgPooledXLNet(XLNetModel):
