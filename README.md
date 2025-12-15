@@ -19,7 +19,7 @@ python train.py -model_name=siamese_xlnet && python finetune.py -model_name=siam
 python train.py -model_name=double_albert && python finetune.py -model_name=double_albert
 ```
 
-Enable loss function wright
+Enable loss function weight
 
 ```
 python train.py -model_name=siamese_roberta -enable_loss_fn_weights && python finetune.py -model_name=siamese_roberta -enable_loss_fn_weights
@@ -37,7 +37,7 @@ python train.py -model_name=siamese_xlnet -enable_awp && python finetune.py -mod
 python train.py -model_name=double_albert -enable_awp && python finetune.py -model_name=double_albert -enable_awp
 ```
 
-Enable both loss function wrights and AWP
+Enable both loss function weights and AWP
 
 ```
 python train.py -model_name=siamese_roberta -enable_loss_fn_weights -enable_awp && python finetune.py -model_name=siamese_roberta -enable_loss_fn_weights -enable_awp
@@ -54,4 +54,22 @@ BERT
 
 ```
 python predict.py -model_name=siamese_bert -checkpoint_dir checkpoints/siamese_bert/
+```
+
+BERT + loss function weights
+
+```
+python predict.py -model_name=siamese_bert -checkpoint_dir checkpoints/siamese_bert_weight/
+```
+
+BERT + AWP
+
+```
+python predict.py -model_name=siamese_bert -checkpoint_dir checkpoints/siamese_bert_awp/
+```
+
+BERT + loss function weights + AWP
+
+```
+python predict.py -model_name=siamese_bert -checkpoint_dir checkpoints/siamese_bert_weight_awp/
 ```
