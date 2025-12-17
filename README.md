@@ -46,6 +46,15 @@ python train.py -model_name=siamese_xlnet -enable_loss_fn_weights -enable_awp &&
 python train.py -model_name=double_albert -enable_loss_fn_weights -enable_awp && python finetune.py -model_name=double_albert -enable_loss_fn_weights -enable_awp
 ```
 
+Enable attetion pooling (instead of average pooling)
+
+```python=
+python train.py -model_name=siamese_roberta -use_attention_pooling && python finetune.py -model_name=siamese_roberta -use_attention_pooling
+python train.py -model_name=siamese_bert -use_attention_pooling && python finetune.py -model_name=siamese_bert -use_attention_pooling
+python train.py -model_name=siamese_xlnet -use_attention_pooling && python finetune.py -model_name=siamese_xlnet -use_attention_pooling
+python train.py -model_name=double_albert -use_attention_pooling && python finetune.py -model_name=double_albert -use_attention_pooling
+``` 
+
 The notebooks folder contains two notebooks. The `stacking.ipynb` implements our weighted ensembling + post-processing grid search and the `oof_cvs.ipynb` shows the CV scores of our models under variuos settings (i.e. ignoring hard targets or ignoring duplicate question rows).
 
 ### Predict

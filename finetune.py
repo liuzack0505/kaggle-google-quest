@@ -72,6 +72,8 @@ def build_parser():
     parser.add_argument('-enable_loss_fn_weights', action='store_true')
     parser.add_argument('-enable_awp', action='store_true',
                         help='Enable Adversarial Weight Perturbation')
+    parser.add_argument('-use_attention_pooling', action='store_true',
+                        help='Use attention pooling instead of average pooling')
     return parser
 
 
@@ -83,13 +85,12 @@ if __name__ == '__main__':
     model_name = args.model_name
     model_type = 'double' if model_name == 'double_albert' else 'siamese'
 
-   # Define mapping from arguments to folder name suffixes
+    # Define mapping from arguments to folder name suffixes
     suffix_mapping = {
         'enable_loss_fn_weights': 'weight',
-        'enable_awp': 'awp'
-    }
-
-    # Build folder name based on model and enabled features
+        'enable_awp': 'awp',
+        'use_attention_pooling': 'attnpool'
+    }    # Build folder name based on model and enabled features
     folder_name_parts = [model_name]
     for arg_name, suffix in suffix_mapping.items():
         if getattr(args, arg_name, False):
@@ -160,7 +161,8 @@ if __name__ == '__main__':
             batch_size=bs, shuffle=False, num_workers=num_workers
         )
 
-        model = models[model_name]()
+        model = models[model_name](
+            use_attention_pooling=args.use_attention_pooling)
         checkpoint_file = f'{checkpoint_dir}{model_name}_fold_{fold_id+1}_best.pth'
 
         # Get last hidden layer outputs from transformers

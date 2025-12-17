@@ -81,6 +81,8 @@ def build_parser():
     parser.add_argument('-enable_loss_fn_weights', action='store_true')
     parser.add_argument('-enable_awp', action='store_true',
                         help='Enable Adversarial Weight Perturbation')
+    parser.add_argument('-use_attention_pooling', action='store_true',
+                        help='Use attention pooling instead of average pooling')
     return parser
 
 
@@ -95,7 +97,8 @@ if __name__ == '__main__':
     # Define mapping from arguments to folder name suffixes
     suffix_mapping = {
         'enable_loss_fn_weights': 'weight',
-        'enable_awp': 'awp'
+        'enable_awp': 'awp',
+        'use_attention_pooling': 'attnpool'
     }
 
     # Build folder name based on model and enabled features
@@ -174,7 +177,8 @@ if __name__ == '__main__':
             batch_size=bs, shuffle=False, num_workers=num_workers
         )
 
-        model = models[model_name]()
+        model = models[model_name](
+            use_attention_pooling=args.use_attention_pooling)
 
         optimizer = get_optimizer(model, lr, weight_decay, model_type)
         scheduler = OneCycleLR(optimizer, n_epochs=n_epochs,
