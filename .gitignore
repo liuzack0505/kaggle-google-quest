@@ -28,3 +28,6 @@ old/
 *.ods#
 
 bert-base-uncased/
+roberta-base/
+xlnet-base-cased/
+albert-base-v2/

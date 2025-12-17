@@ -1,16 +1,20 @@
 import numpy as np
 from tqdm import tqdm
 
-from transformers import BertTokenizer, RobertaTokenizer, AlbertTokenizer, XLNetTokenizer
+from transformers import BertTokenizer, RobertaTokenizer, AlbertTokenizer, XLNetTokenizer, logging
 
+logging.set_verbosity_error()
 
 tokenizers = {
     # 'bert-base-uncased': BertTokenizer,
-    'roberta-base': RobertaTokenizer,
-    'xlnet-base-cased': XLNetTokenizer,
-    'albert-base-v2': AlbertTokenizer,
+    # 'roberta-base': RobertaTokenizer,
+    # 'xlnet-base-cased': XLNetTokenizer,
+    # 'albert-base-v2': AlbertTokenizer,
 
     './bert-base-uncased': BertTokenizer,
+    './roberta-base': RobertaTokenizer,
+    './xlnet-base-cased': XLNetTokenizer,
+    './albert-base-v2': AlbertTokenizer,
 }
 
 

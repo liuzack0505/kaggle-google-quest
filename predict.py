@@ -18,8 +18,6 @@ def build_parser():
     parser.add_argument('-checkpoint_dir', type=str, default='checkpoints/')
     parser.add_argument('-data_dir', type=str, default='data/')
     parser.add_argument('-batch_size', type=int, default=32)
-    parser.add_argument('-enable_loss_fn_weights', action='store_true')
-    parser.add_argument('-enable_awp', action='store_true') 
     return parser
 
 if __name__ == '__main__':
@@ -29,17 +27,6 @@ if __name__ == '__main__':
     model_name = args.model_name
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
-    suffix_mapping = {
-        'enable_loss_fn_weights': 'weight',
-        'enable_awp': 'awp'
-    }
-    folder_name_parts = [model_name]
-    for arg_name, suffix in suffix_mapping.items():
-        if getattr(args, arg_name, False):
-            folder_name_parts.append(suffix)
-    folder_name = '_'.join(folder_name_parts)
-    
-    # checkpoint_dir = os.path.join(args.checkpoint_dir, folder_name) + '/'
     checkpoint_dir = args.checkpoint_dir
     print(f"Loading checkpoints from: {checkpoint_dir}")
 
@@ -102,6 +89,6 @@ if __name__ == '__main__':
     submission = sample_submission.copy()
     submission[TARGETS] = final_preds
     
-    output_filename = 'submission.csv'
+    output_filename = f'submission_{model_name}.csv'
     submission.to_csv(output_filename, index=False)
     print(f"Inference complete! Submission saved to {output_filename}")

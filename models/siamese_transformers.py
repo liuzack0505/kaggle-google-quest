@@ -106,7 +106,7 @@ class PooledXLNet(XLNetModel):
 
 class SiameseXLNet(SiameseTransformer):
     def __init__(self, use_attention_pooling=False):
-        super().__init__(PooledXLNet, 'xlnet-base-cased', use_attention_pooling)
+        super().__init__(PooledXLNet, './xlnet-base-cased', use_attention_pooling)
 
 
 class PooledRoberta(RobertaModel):
@@ -139,5 +139,5 @@ class PooledRoberta(RobertaModel):
 
 class SiameseRoberta(SiameseTransformer):
     def __init__(self, use_attention_pooling=False):
-        super().__init__(PooledRoberta, 'roberta-base', use_attention_pooling)
+        super().__init__(PooledRoberta, './roberta-base', use_attention_pooling)
         self.transformer.resize_type_embeddings(2)

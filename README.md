@@ -53,7 +53,7 @@ python train.py -model_name=siamese_roberta -use_attention_pooling && python fin
 python train.py -model_name=siamese_bert -use_attention_pooling && python finetune.py -model_name=siamese_bert -use_attention_pooling
 python train.py -model_name=siamese_xlnet -use_attention_pooling && python finetune.py -model_name=siamese_xlnet -use_attention_pooling
 python train.py -model_name=double_albert -use_attention_pooling && python finetune.py -model_name=double_albert -use_attention_pooling
-``` 
+```
 
 The notebooks folder contains two notebooks. The `stacking.ipynb` implements our weighted ensembling + post-processing grid search and the `oof_cvs.ipynb` shows the CV scores of our models under variuos settings (i.e. ignoring hard targets or ignoring duplicate question rows).
 
@@ -63,22 +63,34 @@ BERT
 
 ```
 python predict.py -model_name=siamese_bert -checkpoint_dir checkpoints/siamese_bert/
-```
-
-BERT + loss function weights
-
-```
 python predict.py -model_name=siamese_bert -checkpoint_dir checkpoints/siamese_bert_weight/
-```
-
-BERT + AWP
-
-```
 python predict.py -model_name=siamese_bert -checkpoint_dir checkpoints/siamese_bert_awp/
-```
-
-BERT + loss function weights + AWP
-
-```
 python predict.py -model_name=siamese_bert -checkpoint_dir checkpoints/siamese_bert_weight_awp/
+```
+
+RoBERTa
+
+```
+python predict.py -model_name=siamese_roberta -checkpoint_dir checkpoints/siamese_roberta/
+python predict.py -model_name=siamese_roberta -checkpoint_dir checkpoints/siamese_roberta_weight/
+python predict.py -model_name=siamese_roberta -checkpoint_dir checkpoints/siamese_roberta_awp/
+python predict.py -model_name=siamese_roberta -checkpoint_dir checkpoints/siamese_roberta_weight_awp/
+```
+
+XLnet
+
+```
+python predict.py -model_name=siamese_xlnet -checkpoint_dir checkpoints/siamese_xlnet/
+python predict.py -model_name=siamese_xlnet -checkpoint_dir checkpoints/siamese_xlnet_weight/
+python predict.py -model_name=siamese_xlnet -checkpoint_dir checkpoints/siamese_xlnet_awp/
+python predict.py -model_name=siamese_xlnet -checkpoint_dir checkpoints/siamese_xlnet_weight_awp/
+```
+
+ALBERT
+
+```
+python predict.py -model_name=double_albert -checkpoint_dir checkpoints/double_albert/
+python predict.py -model_name=double_albert -checkpoint_dir checkpoints/double_albert_weight/
+python predict.py -model_name=double_albert -checkpoint_dir checkpoints/double_albert_awp/
+python predict.py -model_name=double_albert -checkpoint_dir checkpoints/double_albert_weight_awp/
 ```

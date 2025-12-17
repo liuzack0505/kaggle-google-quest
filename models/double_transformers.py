@@ -10,7 +10,7 @@ from common import *
 
 
 class DoubleTransformer(nn.Module):
-    def __init__(self, AvgPooledModel, pretrained_model_name='albert-base-v2', use_attention_pooling=False):
+    def __init__(self, AvgPooledModel, pretrained_model_name='./albert-base-v2', use_attention_pooling=False):
         super().__init__()
         # We instantiate TWO separate transformers (Question & Answer)
         self.q_transformer = AvgPooledModel.from_pretrained(
@@ -49,4 +49,4 @@ class PooledAlbert(AlbertModel):
 
 class DoubleAlbert(DoubleTransformer):
     def __init__(self, use_attention_pooling=False):
-        super().__init__(PooledAlbert, 'albert-base-v2', use_attention_pooling)
+        super().__init__(PooledAlbert, './albert-base-v2', use_attention_pooling)

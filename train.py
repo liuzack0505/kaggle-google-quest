@@ -39,11 +39,14 @@ models = {
 
 pretrained_models = {
     # 'siamese_bert': 'bert-base-uncased',
-    'siamese_roberta': 'roberta-base',
-    'siamese_xlnet': 'xlnet-base-cased',
-    'double_albert': 'albert-base-v2',
+    # 'siamese_roberta': 'roberta-base',
+    # 'siamese_xlnet': 'xlnet-base-cased',
+    # 'double_albert': 'albert-base-v2',
 
     'siamese_bert': './bert-base-uncased',
+    'siamese_roberta': './roberta-base',
+    'siamese_xlnet': './xlnet-base-cased',
+    'double_albert': './albert-base-v2',
 }
 
 
