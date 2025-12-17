@@ -94,3 +94,19 @@ python predict.py -model_name=double_albert -checkpoint_dir checkpoints/double_a
 python predict.py -model_name=double_albert -checkpoint_dir checkpoints/double_albert_awp/
 python predict.py -model_name=double_albert -checkpoint_dir checkpoints/double_albert_weight_awp/
 ```
+
+### Blending
+
+```
+python blend.py \
+  --w_bert 0.25 \
+  --w_roberta 0.25 \
+  --w_xlnet 0.25 \
+  --w_albert 0.25 \
+  --path_bert submission_siamese_bert.csv \
+  --path_roberta submission_siamese_roberta.csv \
+  --path_xlnet submission_siamese_xlnet.csv \
+  --path_albert submission_double_albert.csv \
+
+python blend.py --w_bert 0.25 --w_roberta 0.25 --w_xlnet 0.25 --w_albert 0.25 --path_bert submission_siamese_bert.csv --path_roberta submission_siamese_roberta.csv --path_xlnet submission_siamese_xlnet.csv --path_albert submission_double_albert.csv
+```
